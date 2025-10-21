@@ -33,11 +33,6 @@ class LevelEditor extends MusicBeatState {
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
             trace("Found Level with ID: " + i);
             // trace(new Level(i)._data);
-            var level = new Level(i);
-            var titleGraphic = level.buildTitleGraphic();
-            titleGraphic.x = 0;
-            titleGraphic.y = titleGraphic.height * index;
-            add(titleGraphic);
             index++; 
         }
     }
@@ -59,6 +54,14 @@ class LevelEditor extends MusicBeatState {
     function destroy() {
         super.destroy();
         Cursor.hide();
+    }
+
+    function loadLevel(id) {
+        var level = new Level(id);
+        
+        var titleGraphic = level.buildTitleGraphic();
+        
+        var backgroundGraphic = level.buildBackground();
     }
 
 }
