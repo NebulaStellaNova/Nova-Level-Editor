@@ -1,0 +1,17 @@
+{
+  "music": "freeplayRandom",
+  "title": "Nova Level Editor",
+  "description": "Fanmade level editor :D",
+  "contributors": [
+      {
+        "name": "Nebula S. Nova",
+        "icon": "nebula",
+        "color": "#9500ff",
+        "roles": "Coder",
+        "url": "https://www.youtube.com/@ChinosModded"
+      }
+  ],
+  "api_version": "0.6.4",
+  "mod_version": "1.0.0",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,64 @@
+import funkin.ui.MusicBeatState;
+
+import funkin.ui.story.Level;
+
+import funkin.data.story.level.LevelRegistry;
+
+import haxe.ui.RuntimeComponentBuilder;
+
+import haxe.ui.data.ArrayDataSource;
+
+import funkin.input.Cursor;
+
+
+import haxe.Json;
+
+import StringTools;
+import Reflect;
+import Math;
+
+using StringTools;
+
+class LevelEditor extends MusicBeatState {
+
+    function new() {
+        super('LevelEditor');
+    }
+
+    function create() {
+        super.create();
+        Cursor.show();
+
+        var index = 0;
+        for (i in LevelRegistry.instance.listSortedLevelIds()) {
+            trace("Found Level with ID: " + i);
+            // trace(new Level(i)._data);
+            var level = new Level(i);
+            var titleGraphic = level.buildTitleGraphic();
+            titleGraphic.x = 0;
+            titleGraphic.y = titleGraphic.height * index;
+            add(titleGraphic);
+            index++; 
+        }
+    }
+
+    function update() {
+        super.update();        
+        get_conductorInUse().update();
+    }
+
+    override function beatHit() {
+        super.beatHit();
+        var curBeat = get_conductorInUse().currentBeat;
+    }
+    override function stepHit() {
+        super.stepHit();
+        var curStep = get_conductorInUse().currentStep;
+    }
+
+    function destroy() {
+        super.destroy();
+        Cursor.hide();
+    }
+
+}

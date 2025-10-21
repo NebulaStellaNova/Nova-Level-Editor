@@ -1,0 +1,18 @@
+import flixel.FlxG;
+import funkin.modding.module.Module;
+import funkin.ui.debug.DebugMenuSubState;
+import funkin.modding.base.ScriptedMusicBeatState;
+
+class LevelEditorInjection extends Module
+{
+	public function new() { super('level-editor-injection'); }
+
+	override public function onSubStateOpenEnd(event:StateChangeScriptEvent)
+	{
+		if (Std.isOfType(event.targetState, DebugMenuSubState))
+		{
+			event.targetState.createItem("Nova Level Editor", ()->FlxG.switchState(ScriptedMusicBeatState.init('LevelEditor')));
+		}
+	}
+
+}
