@@ -1,0 +1,21 @@
+import funkin.modding.PolymodHandler;
+import funkin.modding.module.Module;
+
+class LevelEditorData extends Module {
+
+    public static var EDITOR_TITLE;
+    public static var EDITOR_FOLDER;
+    public static var EDITOR_VERSION;
+
+    public function new() {
+        super('LevelEditorData');
+        for (i in PolymodHandler.getAllMods()) {
+            if (i.title == "Nova Level Editor") {
+                LevelEditorData.EDITOR_TITLE = i.title;
+                LevelEditorData.EDITOR_FOLDER = i.id;
+                LevelEditorData.EDITOR_VERSION = i.modVersion.version.join(".");
+            } 
+        }
+    }
+
+}

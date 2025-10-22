@@ -40,7 +40,6 @@ class LevelEditor extends MusicBeatState {
         super.create();
         Cursor.show();
 
-
         initStyles();
 
         UI_CAMERA = new FlxCamera();
@@ -48,13 +47,14 @@ class LevelEditor extends MusicBeatState {
         FlxG.cameras.add(UI_CAMERA, false);
 
         var MENU_BAR = RuntimeComponentBuilder.build(Paths.ui("level-editor/menubar"));
-        // MENU_BAR.findComponent("menuBarTitle").text = editorTitle + " v" + editorVersion;
+        MENU_BAR.findComponent("menuBarTitle").text = LevelEditorData.EDITOR_TITLE + " v" + LevelEditorData.EDITOR_VERSION;
         MENU_BAR.cameras = [UI_CAMERA];
         add(MENU_BAR);
 
         var LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));
         LEVEL_DATA.cameras = [UI_CAMERA];     
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
+        // LEVEL_DATA.screenCenter();
 
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {

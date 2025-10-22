@@ -1,4 +1,5 @@
-<window title="Level Data" width="400" maximizable="false" minimizable="false" collapsable="false" closable="false">
+<window title="Level Data" width="400" maximizable="false" minimizable="false" collapsable="false" closable="false" draggable="true">
+
     <vbox width="100%">
         <dropdown id="levelDropdown" text="Select a Level (Week)" width="100%" searchable="true" tooltip="Choose a Level."/>
     </vbox>
@@ -33,9 +34,9 @@
                <checkbox id="visible" selected="true" />
            </item-renderer> -->
             <data>
-                <item text="Prop1" visible="true"/>
-                <item text="Prop2" visible="true"/>
-                <item text="Prop3" visible="true"/>
+                <item text="Prop1"/>
+                <item text="Prop2"/>
+                <item text="Prop3"/>
             </data>
         </listview>
     </vbox>
