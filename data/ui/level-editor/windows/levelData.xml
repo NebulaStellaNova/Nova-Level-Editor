@@ -1,0 +1,43 @@
+<window title="Level Data" width="400" maximizable="false" minimizable="false" collapsable="false" closable="false">
+    <vbox width="100%">
+        <dropdown id="levelDropdown" text="Select a Level (Week)" width="100%" searchable="true" tooltip="Choose a Level."/>
+    </vbox>
+
+    <grid width="100%">
+        <label text="Level Name:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="levelName" placeholder="Daddy Dearest" width="100%" verticalAlign="center" validator="required" tooltip="The title of the level, as seen in the top corner."/>  
+        
+        <label text="Title Asset:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="titleAsset" placeholder="week1" width="100%" verticalAlign="center" validator="required" tooltip="The graphic for the level, as seen in the scrolling list."/>
+        
+        <label text="Background:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="backgroundAsset" placeholder="#F9CF51" width="100%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a color or an Image.)"/>
+        
+        <label text="Songs:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="levelSongs" placeholder="bopeebo, fresh, dadbattle" width="100%" verticalAlign="center" validator="required" tooltip="The list of song IDs included in this level."/>
+    </grid>
+
+    <spacer height="10"/>
+    
+    <hbox width="100%">        
+        <spacer width="50%"/>
+        <label text="Is Visible:" style="padding: 2px;" verticalAlign="center" tooltip="Whether this week is visible in the story menu."/>
+        <checkbox id="levelIsVisible" tooltip="Whether this week is visible in the story menu."/>
+    </hbox>
+
+    <vbox width="100%">
+        <label text="Props:" style="padding: 2px;" verticalAlign="center" tooltip="The props to display over the colored background or image\nIn the base game this is usually Boyfriend and the opponent."/>
+        <listview id="levelProps" width="100%" selectedIndex="0">
+            <!-- <item-renderer width="100%" layout="horizontal">
+               <label id="text" width="100%" verticalAlign="center" />
+               <checkbox id="visible" selected="true" />
+           </item-renderer> -->
+            <data>
+                <item text="Prop1" visible="true"/>
+                <item text="Prop2" visible="true"/>
+                <item text="Prop3" visible="true"/>
+            </data>
+        </listview>
+    </vbox>
+
+</window>

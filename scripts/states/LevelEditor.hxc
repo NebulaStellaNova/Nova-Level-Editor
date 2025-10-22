@@ -1,5 +1,7 @@
 import funkin.ui.MusicBeatState;
 
+import haxe.ui.containers.windows.WindowManager;
+
 import funkin.ui.story.Level;
 
 import funkin.data.story.level.LevelRegistry;
@@ -28,6 +30,8 @@ class LevelEditor extends MusicBeatState {
     public var UI_CAMERA:FlxCamera;
     public var LEVEL_CAMERA:FlxCamera;
 
+    public var WINDOW_MANAGER:WindowManager = new WindowManager(); // nigger - genzu
+
     function new() {
         super('LevelEditor');
     }
@@ -35,6 +39,7 @@ class LevelEditor extends MusicBeatState {
     function create() {
         super.create();
         Cursor.show();
+
 
         initStyles();
 
@@ -46,6 +51,10 @@ class LevelEditor extends MusicBeatState {
         // MENU_BAR.findComponent("menuBarTitle").text = editorTitle + " v" + editorVersion;
         MENU_BAR.cameras = [UI_CAMERA];
         add(MENU_BAR);
+
+        var LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));
+        LEVEL_DATA.cameras = [UI_CAMERA];     
+        WINDOW_MANAGER.addWindow(LEVEL_DATA);
 
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
