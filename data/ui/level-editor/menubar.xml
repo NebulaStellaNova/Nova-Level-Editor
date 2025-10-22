@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menubar id="menubar" width="100%" height="5%">
+    <style>
+        .menu {
+        // The width of the individual menu items
+        width: 120px;
+        }
+    </style>
+
+    
+    <menu text="File" width="300">
+        <menu-item id="newLevel" text="New" shortcutText="Ctrl + N"/>
+        <menu-separator />
+        <menu-item id="saveLevel" text="Save" shortcutText="Ctrl + S" />
+        <menu-item id="saveLevelAs" text="Save As" shortcutText="Ctrl + Shift + S" disabled="true"/>
+        <menu-separator />
+        <!-- <menu-item id="deleteLevel" text="Delete Level" style="color: indianred"/>
+        <menu-separator /> -->
+        <menu-item id="exitToMenu" text="Exit To Menu" shortcutText="Ctrl + Q" />
+    </menu>
+
+    <!-- <menu text="Edit" width="300">
+        <menu-item id="undo" text="Undo" shortcutText="Ctrl + Z"/>
+        <menu-item id="redo" text="Redo" shortcutText="Ctrl + Y"/>
+
+        I couldn't get onClick to work so I'm removing this
+    </menu> -->
+    <!-- <menu text="Windows">
+    <menu-item id="LevelDataWindow" text="Level Data" />
+  </menu> -->
+
+    <menu text="View" width="300">
+        <menu-item id="uiSwap" text="Swap UI Side" />
+    </menu>
+
+    <menu text="Audio" width="300">
+        <menu text="Editor Music">
+            <vbox width="100%">
+                <listview id="musicMenu" width="300" height="400" selectedIndex="0">
+
+                </listview>
+            </vbox>
+        </menu>
+        <vbox width="100%" style="padding: 12px;">
+            <menu-separator />
+            <spacer height="10%" />
+            <label id="editorMusicVolume" text="Editor Music - 100%" />
+            <slider id="menubarItemVolumeInstrumental" width="100%" majorTicks="10" minorTicks="5"
+                pos="100" />
+        </vbox>
+    </menu>
+
+    <menu text="Converters" width="300">
+        <menu-item text="Codename Engine to V-Slice" disabled="false" id="fromCNE"/>
+        <menu-item text="Psych Engine to V-Slice" disabled="false" id="fromPsych"/>
+        <menu-separator disabled="true"/>
+        <menu-item text="V-Slice to Codename Engine" shortcutText="(Coming Soon)" disabled="true"/>
+        <menu-item text="V-Slice to Psych Engine" shortcutText="(Coming Soon)" disabled="true"/>
+    </menu>
+
+    <menu text="Help" width="300">
+        <menu-item id="userGuide" text="User Guide" shortcutText="F1" />
+        <menu-item id="checkForUpdates" text="Check for Updates" shortcutText="(Coming Soon)"
+            disabled="true" />
+        <menu-item id="redownloadEditor" text="Re-Download Editor" shortcutText="(Coming Soon)"
+            disabled="true" />
+    </menu>
+
+    <spacer width="100%" />
+    <label text="" verticalAlign="center" id="menuBarTitle" />
+</menubar>

@@ -10,6 +10,10 @@ import haxe.ui.data.ArrayDataSource;
 
 import funkin.input.Cursor;
 
+import flixel.FlxG;
+import flixel.FlxCamera;
+
+import flixel.util.FlxColor;
 
 import haxe.Json;
 
@@ -21,6 +25,9 @@ using StringTools;
 
 class LevelEditor extends MusicBeatState {
 
+    public var UI_CAMERA:FlxCamera;
+    public var LEVEL_CAMERA:FlxCamera;
+
     function new() {
         super('LevelEditor');
     }
@@ -28,6 +35,17 @@ class LevelEditor extends MusicBeatState {
     function create() {
         super.create();
         Cursor.show();
+
+        initStyles();
+
+        UI_CAMERA = new FlxCamera();
+        UI_CAMERA.bgColor = FlxColor.TRANSPARENT;
+        FlxG.cameras.add(UI_CAMERA, false);
+
+        var MENU_BAR = RuntimeComponentBuilder.build(Paths.ui("level-editor/menubar"));
+        // MENU_BAR.findComponent("menuBarTitle").text = editorTitle + " v" + editorVersion;
+        MENU_BAR.cameras = [UI_CAMERA];
+        add(MENU_BAR);
 
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
@@ -64,4 +82,7 @@ class LevelEditor extends MusicBeatState {
         var backgroundGraphic = level.buildBackground();
     }
 
+    function initStyles() {
+        add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));
+    }
 }
