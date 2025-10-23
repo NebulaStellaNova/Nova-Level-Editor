@@ -35,6 +35,8 @@ using StringTools;
 
 class LevelEditor extends MusicBeatState {
 
+    public static var instance:LevelEditor;
+
     // -- Camears -- \\
     public var UI_CAMERA:FlxCamera;
     public var LEVEL_CAMERA:FlxCamera;
@@ -69,6 +71,8 @@ class LevelEditor extends MusicBeatState {
     function create() {
         super.create();
         Cursor.show();
+
+        instance = this;
 
         initStyles();
 

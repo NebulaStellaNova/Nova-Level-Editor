@@ -16,9 +16,10 @@
         <label text="Background:" style="padding: 2px;" verticalAlign="center"/>
         <textfield  id="backgroundAsset" placeholder="#F9CF51 " width="100%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a color or an Image.)"/>
                       <!-- Added a space to stop bugging out ^ -->
-                       
+
         <label text="Songs:" style="padding: 2px;" verticalAlign="center"/>
-        <textfield  id="levelSongs" placeholder="bopeebo, fresh, dadbattle" width="100%" verticalAlign="center" validator="required" tooltip="The list of song IDs included in this level."/>
+        <textfield  id="levelSongs" placeholder="bopeebo, fresh, dadbattle " width="100%" verticalAlign="center" validator="required" tooltip="The list of song IDs included in this level."/>
+                                   <!-- Added a space to stop bugging out ^ -->
     </grid>
 
     <spacer height="10"/>
