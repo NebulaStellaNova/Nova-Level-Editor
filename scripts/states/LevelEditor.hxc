@@ -16,7 +16,12 @@ import funkin.ui.MusicBeatState;
 
 import funkin.ui.story.Level;
 
+import funkin.util.Constants;
+
 import flixel.util.FlxColor;
+
+import flixel.util.FlxTimer;
+
 
 import funkin.input.Cursor;
 
@@ -46,6 +51,9 @@ class LevelEditor extends MusicBeatState {
     public var levelBackground:FunkinSprite;
     public var blackBar:FunkinSprite;
     public var levelProps = [];
+
+    // -- Overlays -- \\
+    public var titleAssetOverlay:FunkinSprite;
 
     // -- Text -- \\
     var levelTitleText:FlxText;
@@ -96,6 +104,7 @@ class LevelEditor extends MusicBeatState {
 
         var levelDropdown = LEVEL_DATA.findComponent("levelDropdown");
         var levelDropdownCallback = ()->{
+            if (levelDropdown.selectedItem == null || levelDropdown.selectedItem.text == "Select a Level (Week)") return;
             // -- Get Selected Level Data -- \\
             SELECTED_LEVEL = new Level('week1');
             SELECTED_LEVEL._data = LEVEL_REGISTRY.get(levelDropdown.selectedItem.id);
@@ -124,6 +133,47 @@ class LevelEditor extends MusicBeatState {
         }
         levelDropdown.onChange = levelDropdownCallback;
 
+        var levelNameField = LEVEL_DATA.findComponent("levelName");
+        var levelNameFieldCallback = ()->{
+            SELECTED_LEVEL._data.name = levelNameField.text;
+            updateText();
+        }
+        levelNameField.onChange = levelNameFieldCallback;
+
+        var titleAsset = LEVEL_DATA.findComponent("titleAsset");
+        var titleAssetCallback = ()->{
+            if (NovaUtils.checkImageExists("storymenu/titles/" + titleAsset.text)) {
+                SELECTED_LEVEL._data.titleAsset = "storymenu/titles/" + titleAsset.text;
+                updateTitleSprite();
+                titleAssetOverlay.visible = false;
+            } else {
+                titleAssetOverlay.visible = true;
+            }
+        }
+        titleAsset.onChange = titleAssetCallback;
+
+        titleAssetOverlay = new FunkinSprite(113, 110).makeGraphic(titleAsset.width - 2, titleAsset.height - 2, FlxColor.RED);
+        titleAssetOverlay.blend = 0;
+        titleAssetOverlay.alpha = 0.5;
+        titleAssetOverlay.visible = false;
+        LEVEL_DATA.add(titleAssetOverlay);
+
+        var backgroundAssetE = LEVEL_DATA.findComponent("backgroundAsset");
+        var backgroundAssetECallback = ()->{
+            SELECTED_LEVEL._data.background = backgroundAssetE.text;
+            updateLevelBackground();
+        }
+        backgroundAssetE.onChange = backgroundAssetECallback;
+
+        var levelSongs = LEVEL_DATA.findComponent("levelSongs");
+        var levelSongsCallback = ()->{
+            var songList = levelSongs.text;
+            songList = songList.replace(" ", "");
+            SELECTED_LEVEL._data.songs = songList.split(",");
+            updateText(); 
+        }
+        levelSongs.onChange = levelSongsCallback;
+
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
             // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
@@ -134,24 +184,42 @@ class LevelEditor extends MusicBeatState {
         }
     }
 
-    function update() {
-        super.update();        
+    function update(e) {
+        super.update(e);        
         get_conductorInUse().update();
 
-        
+        if (FlxG.keys.justPressed.ENTER) {
+
+        }
+
         for (i in [titleAssetSprite, levelBackground, blackBar, tracklistText, scoreText, levelTitleText].concat(levelProps)) {
             if (i == null) continue;
             i.cameras = [LEVEL_CAMERA];
         }
+
+        /* if (LEVEL_DATA != null) {
+            
+        } */
     }
 
     override function beatHit() {
         super.beatHit();
         var curBeat = get_conductorInUse().currentBeat;
+
+        for (i in levelProps) {
+            i.danceEvery *= 2;
+            if (i == null) continue;
+            if (i.danceEvery > 0 && (curBeat % (i.danceEvery)) == 0) {
+                i.dance(i.shouldBop);
+            }
+            i.danceEvery /= 2;
+        }
     }
-    override function stepHit() {
-        super.stepHit();
+    override function stepHit(e) {
+        super.stepHit(e);
         var curStep = get_conductorInUse().currentStep;
+
+        
     }
 
     function destroy() {
@@ -207,11 +275,24 @@ class LevelEditor extends MusicBeatState {
         tracklistText.screenCenter(0x01);
         tracklistText.x -= (FlxG.width * 0.35);
 
+        levelTitleText.text = SELECTED_LEVEL.getTitle();
+        levelTitleText.updateHitbox();
+        levelTitleText.x = FlxG.width - levelTitleText.width - Math.max(FullScreenScaleMode.gameNotchSize.x, 10);
+
         /* var levelScore:Null<SaveScoreData> = Save.instance.getLevelScore(currentLevelId, currentDifficultyId);
         highScore = levelScore?.score ?? 0; */
         // levelScore.accuracy
     }
 
+    function updateTitleSprite() {
+        remove(titleAssetSprite);
+        titleAssetSprite = SELECTED_LEVEL.buildTitleGraphic();
+        titleAssetSprite.updateHitbox();
+        titleAssetSprite.screenCenter();
+        titleAssetSprite.y += Std.int(levelBackground.y + levelBackground.height + 10 + MENU_BAR.height)/2;
+        titleAssetSprite.y -= 30;
+        add(titleAssetSprite);
+    }
     
     function updateProps() {
         levelProps = [];
@@ -224,10 +305,20 @@ class LevelEditor extends MusicBeatState {
             i.applyData(); */
             i.y += MENU_BAR.height;
             add(i);
+            i.onCreate();
         }
     }
 
-
+    function updateLevelBackground() {
+        remove(levelBackground);
+        remove(blackBar);
+        levelBackground = SELECTED_LEVEL.buildBackground();
+        levelBackground.y = MENU_BAR.height + 56;
+        
+        blackBar = new FunkinSprite(levelBackground.x, 0).makeSolidColor(FlxG.width, Std.int(400 + levelBackground.y), FlxColor.BLACK);
+        add(blackBar);
+        add(levelBackground);
+    }
 
     function initStyles() {
         add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));

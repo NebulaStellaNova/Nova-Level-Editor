@@ -1,0 +1,27 @@
+import funkin.util.FileUtil;
+
+import funkin.modding.PolymodHandler;
+
+class NovaUtils {
+    public static function checkImageExists(id:String) {
+        if (id == "") return false;
+        var fileExists = false;
+        var foldersToCheck = [
+            "assets/"
+        ];
+
+        for (mod in PolymodHandler.getAllMods()) {
+            foldersToCheck.push("mods/" + mod.id + "/");
+        }
+
+        for (i in foldersToCheck) {
+            if (FileUtil.fileExists(i + "images/" + id + ".png") || FileUtil.directoryExists(i + "images/" + id))
+                fileExists = true;
+            
+            if (FileUtil.fileExists(i + "shared/images/" + id + ".png") || FileUtil.directoryExists(i + "images/" + id))
+                fileExists = true;
+        }
+
+        return fileExists;
+    }
+}

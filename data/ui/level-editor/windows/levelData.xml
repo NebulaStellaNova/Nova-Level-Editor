@@ -14,7 +14,7 @@
                <!-- Added a space to stop bugging out ^ -->
         
         <label text="Background:" style="padding: 2px;" verticalAlign="center"/>
-        <textfield  id="backgroundAsset" placeholder="#F9CF51 " width="100%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a color or an Image.)"/>
+        <textfield  id="backgroundAsset" placeholder="#F9CF51 " width="100%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a HEX Code Color or an Image.)"/>
                       <!-- Added a space to stop bugging out ^ -->
 
         <label text="Songs:" style="padding: 2px;" verticalAlign="center"/>
