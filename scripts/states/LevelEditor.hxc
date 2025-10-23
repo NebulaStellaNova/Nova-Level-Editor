@@ -1,21 +1,29 @@
-import funkin.ui.MusicBeatState;
+import funkin.modding.base.ScriptedFlxSpriteGroup;
 
 import haxe.ui.containers.windows.WindowManager;
-
-import funkin.ui.story.Level;
 
 import funkin.data.story.level.LevelRegistry;
 
 import haxe.ui.RuntimeComponentBuilder;
 
+import funkin.graphics.FunkinSprite;
+
+import funkin.ui.FullScreenScaleMode;
+
 import haxe.ui.data.ArrayDataSource;
+
+import funkin.ui.MusicBeatState;
+
+import funkin.ui.story.Level;
+
+import flixel.util.FlxColor;
 
 import funkin.input.Cursor;
 
-import flixel.FlxG;
-import flixel.FlxCamera;
+import flixel.text.FlxText;
 
-import flixel.util.FlxColor;
+import flixel.FlxCamera;
+import flixel.FlxG;
 
 import haxe.Json;
 
@@ -27,10 +35,32 @@ using StringTools;
 
 class LevelEditor extends MusicBeatState {
 
+    // -- Camears -- \\
     public var UI_CAMERA:FlxCamera;
     public var LEVEL_CAMERA:FlxCamera;
 
+    // -- Sprites -- \\
+    public var titleAssetSprite:FunkinSprite;
+    public var levelBackground:FunkinSprite;
+    public var blackBar:FunkinSprite;
+    public var levelProps = [];
+
+    // -- Text -- \\
+    var levelTitleText:FlxText;
+    var scoreText:FlxText;
+    var tracklistText:FlxText;
+
+    // -- UI Elements -- \\
+    var MENU_BAR;
+    var LEVEL_DATA;
+    
+    // -- Other Stuff -- \\
     public var WINDOW_MANAGER:WindowManager = new WindowManager(); // nigger - genzu
+
+    public var LEVEL_REGISTRY = Map.new();
+    
+    public var SELECTED_LEVEL:Level;
+
 
     function new() {
         super('LevelEditor');
@@ -42,24 +72,60 @@ class LevelEditor extends MusicBeatState {
 
         initStyles();
 
+        // -- Intialize Camears -- \\
+        LEVEL_CAMERA = new FlxCamera();
+        LEVEL_CAMERA.bgColor = FlxColor.TRANSPARENT;
+        FlxG.cameras.add(LEVEL_CAMERA, false);
+        
         UI_CAMERA = new FlxCamera();
         UI_CAMERA.bgColor = FlxColor.TRANSPARENT;
-        FlxG.cameras.add(UI_CAMERA, false);
+        FlxG.cameras.add(UI_CAMERA, true);
 
-        var MENU_BAR = RuntimeComponentBuilder.build(Paths.ui("level-editor/menubar"));
+        // -- UI Data == \\
+        MENU_BAR = RuntimeComponentBuilder.build(Paths.ui("level-editor/menubar"));
         MENU_BAR.findComponent("menuBarTitle").text = LevelEditorData.EDITOR_TITLE + " v" + LevelEditorData.EDITOR_VERSION;
-        MENU_BAR.cameras = [UI_CAMERA];
         add(MENU_BAR);
 
-        var LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));
-        LEVEL_DATA.cameras = [UI_CAMERA];     
+        LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));   
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
-        // LEVEL_DATA.screenCenter();
+        LEVEL_DATA.screenCenter();
+
+        var levelDropdown = LEVEL_DATA.findComponent("levelDropdown");
+        var levelDropdownCallback = ()->{
+            // -- Get Selected Level Data -- \\
+            SELECTED_LEVEL = new Level('week1');
+            SELECTED_LEVEL._data = LEVEL_REGISTRY.get(levelDropdown.selectedItem.id);
+            loadLevel(SELECTED_LEVEL);
+
+            // -- Set UI To Selected Data -- \\
+            LEVEL_DATA.findComponent("levelName").text = SELECTED_LEVEL.getTitle();
+
+            LEVEL_DATA.findComponent("titleAsset").text = SELECTED_LEVEL._data.titleAsset.replace("storymenu/titles/", "") + "";
+
+            LEVEL_DATA.findComponent("backgroundAsset").text = SELECTED_LEVEL._data.background;
+
+            LEVEL_DATA.findComponent("levelSongs").text = SELECTED_LEVEL.getSongs().join(", ");
+
+            LEVEL_DATA.findComponent("levelIsVisible").selected = SELECTED_LEVEL.isVisible();
+
+            LEVEL_DATA.findComponent("levelProps").dataSource.clear();
+            for (i in SELECTED_LEVEL._data.props) {
+                LEVEL_DATA.findComponent("levelProps").dataSource.add(
+                    {
+                        text: NovaConverters.capitalize(i.assetPath.split("/").pop()),
+                        data: i
+                    }
+                );
+            }
+        }
+        levelDropdown.onChange = levelDropdownCallback;
 
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
-            trace("Found Level with ID: " + i);
-            // trace(new Level(i)._data);
+            // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
+            var level = new Level(i);
+            LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: level.getTitle(), id: i});
+            LEVEL_REGISTRY.set(i, level._data);
             index++; 
         }
     }
@@ -67,6 +133,12 @@ class LevelEditor extends MusicBeatState {
     function update() {
         super.update();        
         get_conductorInUse().update();
+
+        
+        for (i in [titleAssetSprite, levelBackground, blackBar, tracklistText, scoreText, levelTitleText].concat(levelProps)) {
+            if (i == null) continue;
+            i.cameras = [LEVEL_CAMERA];
+        }
     }
 
     override function beatHit() {
@@ -83,13 +155,75 @@ class LevelEditor extends MusicBeatState {
         Cursor.hide();
     }
 
-    function loadLevel(id) {
-        var level = new Level(id);
+    function loadLevel(level) {
+        for (i in [titleAssetSprite, levelBackground, blackBar, tracklistText, scoreText, levelTitleText, levelProps].concat(levelProps))
+            if (members.contains(i))
+                remove(i);
+
         
-        var titleGraphic = level.buildTitleGraphic();
+        levelBackground = level.buildBackground();
+        levelBackground.y = MENU_BAR.height + 56;
         
-        var backgroundGraphic = level.buildBackground();
+        blackBar = new FunkinSprite(levelBackground.x, 0).makeSolidColor(FlxG.width, Std.int(400 + levelBackground.y), FlxColor.BLACK);
+        add(blackBar);
+        add(levelBackground);
+        
+        titleAssetSprite = level.buildTitleGraphic();
+        titleAssetSprite.updateHitbox();
+        titleAssetSprite.screenCenter();
+        titleAssetSprite.y += Std.int(levelBackground.y + levelBackground.height + 10 + MENU_BAR.height)/2;
+        titleAssetSprite.y -= 30;
+        add(titleAssetSprite);
+
+        tracklistText = new FlxText(FlxG.width * 0.05, levelBackground.x + levelBackground.height + 100 + MENU_BAR.height, 0, "Tracks", 32);
+        tracklistText.setFormat('VCR OSD Mono', 32);
+        tracklistText.alignment = 'center';
+        tracklistText.color = 0xFFE55777;
+        add(tracklistText);
+
+        scoreText = new FlxText(Math.max(FullScreenScaleMode.gameNotchSize.x, 10), 10 + MENU_BAR.height, 0, 'HIGH SCORE: XXXXXXXX');
+        scoreText.setFormat('VCR OSD Mono', 32);
+        add(scoreText);
+
+        levelTitleText = new FlxText(Math.max((FlxG.width * 0.7), FlxG.width - FullScreenScaleMode.gameNotchSize.x), 10 + MENU_BAR.height, 0, level.getTitle());
+        levelTitleText.setFormat('VCR OSD Mono', 32, FlxColor.WHITE, 'right');
+        levelTitleText.alpha = 0.7;
+        levelTitleText.updateHitbox();
+        levelTitleText.x = FlxG.width - levelTitleText.width - Math.max(FullScreenScaleMode.gameNotchSize.x, 10);
+        add(levelTitleText);
+
+        updateText();
+        updateProps();
     }
+
+    function updateText() {
+        tracklistText.text = 'TRACKS\n\n';
+        tracklistText.text += SELECTED_LEVEL.getSongDisplayNames('normal').join('\n');
+
+        tracklistText.screenCenter(0x01);
+        tracklistText.x -= (FlxG.width * 0.35);
+
+        /* var levelScore:Null<SaveScoreData> = Save.instance.getLevelScore(currentLevelId, currentDifficultyId);
+        highScore = levelScore?.score ?? 0; */
+        // levelScore.accuracy
+    }
+
+    
+    function updateProps() {
+        levelProps = [];
+        for (prop in SELECTED_LEVEL.buildProps()) {
+            levelProps.push(prop);
+        }
+        for (i in levelProps) {
+            /* i.x += (FullScreenScaleMode.gameCutoutSize.x / 4);
+            i.onCreate();
+            i.applyData(); */
+            i.y += MENU_BAR.height;
+            add(i);
+        }
+    }
+
+
 
     function initStyles() {
         add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));
