@@ -108,11 +108,22 @@ class LevelEditor extends MusicBeatState {
         LEVEL_DATA.x = FlxG.width - LEVEL_DATA.width - 20;
 
         var editPropButton = LEVEL_DATA.findComponent("editProp");
-        var editPropCallback = ()->{
+        var editPropCallback = ()->{ 
+            LEVEL_DATA.disabled = true;
             var EDIT_PROP = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/editProp"));   
             WINDOW_MANAGER.addWindow(EDIT_PROP);
             EDIT_PROP.screenCenter();
             EDIT_PROP.x = 20;
+            
+            EDIT_PROP.findComponent("close").onClick = ()->{
+                LEVEL_DATA.disabled = false;
+                WINDOW_MANAGER.closeWindow(EDIT_PROP);
+            }
+            
+            EDIT_PROP.findComponent("apply").onClick = ()->{
+                LEVEL_DATA.disabled = false;
+                WINDOW_MANAGER.closeWindow(EDIT_PROP);
+            }
         }
         editPropButton.onClick = editPropCallback;
 
