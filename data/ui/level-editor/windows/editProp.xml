@@ -12,9 +12,36 @@
 
     <grid width="100%">
         <label text="Asset Path:" style="padding: 2px;" verticalAlign="center"/>
-        <textfield  id="assetPath" width="100%" verticalAlign="center" validator="required" tooltip="Asset path for the prop."/>   
+        <textfield  id="assetPath" width="100%" verticalAlign="center" validator="required" tooltip="Asset path for the prop. MUST BE IN 'storymenu/props/'"/>
+
+        <label text="Scale:" style="padding: 2px;" verticalAlign="center"/>
+        <number-stepper id="scale" pos="0" step="0.1" max="1" width="100%" verticalAlign="center" tooltip="The scale for the prop."/>
+
+        <label text="Alpha:" style="padding: 2px;" verticalAlign="center"/>
+        <number-stepper id="alpha" pos="0" step="0.1" max="1" width="100%" verticalAlign="center" tooltip="The alpha for the prop. (0 = Hidden, 1 = Visible)"/>
+        
+        <label text="Bop Interval:" style="padding: 2px;" verticalAlign="center"/>
+        <number-stepper id="danceEvery" pos="0" step="1" width="100%" verticalAlign="center" tooltip="The rate at which the prop bops on beat."/>
+
+        <label text="Offsets:" style="padding: 2px;" verticalAlign="center"/>
+        <hbox width="100%">
+            <number-stepper id="offsetX" pos="0" step="1" width="100%" verticalAlign="center" tooltip="The prop's y offset."/>
+            <number-stepper id="offsetY" pos="0" step="1" width="100%" verticalAlign="center" tooltip="The prop's x offset."/>
+        </hbox>
+
+        <!-- <label text="Animations:" style="padding: 2px;" verticalAlign="center"/> -->
+
     </grid>
 
+    <spacer height="10"/>
+
+    <hbox width="100%">
+        <spacer width="50%"/>
+        <label text="Is Pixel:" style="padding: 2px;" verticalAlign="center"/>
+        <checkbox id="isPixel" tooltip="Whether this week is pixel or not."/>
+    </hbox>
+
+    <spacer height="2"/>
     <!-- Footer -->
     <hbox width="100%">
         <button id="close" text="Cancel" horizontalAlign="left"/>

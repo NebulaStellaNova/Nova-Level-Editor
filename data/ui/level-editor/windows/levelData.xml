@@ -49,6 +49,12 @@
     </vbox>
 
     <spacer height="2"/>
+    
+    <hbox width="100%">
+        <button id="createProp" text="Create Prop" width="100%"/>
+        <button id="deleteProp" text="Delete Prop" width="100%"/>
+    </hbox>
+
     <button id="editProp" text="Edit Selected Prop" width="100%"/>
 
     <!-- <spacer height="2"/>

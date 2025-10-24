@@ -16,6 +16,7 @@ import funkin.audio.FunkinSound;
 
 import funkin.ui.MusicBeatState;
 
+import funkin.ui.story.LevelProp;
 import funkin.ui.story.Level;
 
 import funkin.util.Constants;
@@ -47,7 +48,7 @@ class LevelEditor extends MusicBeatState {
 
     public static var instance:LevelEditor;
 
-    // -- Camears -- \\
+    // -- Cameras -- \\
     public var UI_CAMERA:FlxCamera;
     public var LEVEL_CAMERA:FlxCamera;
 
@@ -75,6 +76,7 @@ class LevelEditor extends MusicBeatState {
     public var LEVEL_REGISTRY = Map.new();
     
     public var SELECTED_LEVEL:Level;
+    public var SELECTED_PROP:LevelProp;
 
 
     function new() {
@@ -110,11 +112,20 @@ class LevelEditor extends MusicBeatState {
 
         var editPropButton = LEVEL_DATA.findComponent("editProp");
         var editPropCallback = ()->{ 
+            if (SELECTED_PROP == null) return;
             LEVEL_DATA.disabled = true;
             var EDIT_PROP = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/editProp"));   
             WINDOW_MANAGER.addWindow(EDIT_PROP);
             EDIT_PROP.screenCenter();
             EDIT_PROP.x = 20;
+
+            EDIT_PROP.findComponent("assetPath").text = SELECTED_PROP.propData.assetPath.replace("storymenu/props/", "");
+            EDIT_PROP.findComponent("scale").pos = SELECTED_PROP.propData.scale;
+            EDIT_PROP.findComponent("alpha").pos = SELECTED_PROP.propData.alpha;
+            EDIT_PROP.findComponent("danceEvery").pos = SELECTED_PROP.propData.danceEvery;
+            EDIT_PROP.findComponent("offsetX").pos = SELECTED_PROP.propData.offsets[0];
+            EDIT_PROP.findComponent("offsetY").pos = SELECTED_PROP.propData.offsets[0];
+            EDIT_PROP.findComponent("isPixel").selected = SELECTED_PROP.propData.isPixel;
             
             EDIT_PROP.findComponent("close").onClick = ()->{
                 LEVEL_DATA.disabled = false;
@@ -124,6 +135,7 @@ class LevelEditor extends MusicBeatState {
             EDIT_PROP.findComponent("apply").onClick = ()->{
                 LEVEL_DATA.disabled = false;
                 WINDOW_MANAGER.closeWindow(EDIT_PROP);
+                loadLevel(SELECTED_LEVEL);
             }
         }
         editPropButton.onClick = editPropCallback;
@@ -152,7 +164,7 @@ class LevelEditor extends MusicBeatState {
                 LEVEL_DATA.findComponent("levelProps").dataSource.add(
                     {
                         text: NovaConverters.capitalize(i.assetPath.split("/").pop()),
-                        data: i
+                        assetPath: i.assetPath
                     }
                 );
             }
@@ -212,23 +224,43 @@ class LevelEditor extends MusicBeatState {
             SELECTED_LEVEL._data.visible = isVisible.selected;
         }
 
+        var levelPropList = LEVEL_DATA.findComponent("levelProps");
+        var levelPropListCallback = levelPropList.onClick = ()->{
+            for (i in levelProps) {
+                if (i.propData.assetPath == levelPropList.selectedItem.assetPath) {
+                    SELECTED_PROP = i;
+                    break;
+                }
+            }
+        }
+
         var first;
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
             // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
             var level = new Level(i);
             LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: level.getTitle(), id: i});
-            if (index == 0) first = ()->LEVEL_DATA.findComponent("levelDropdown").selectedItem = {text: level.getTitle(), id: i}; 
+            if (index == 0) first = ()->{
+                LEVEL_DATA.findComponent("levelDropdown").selectedItem = {text: level.getTitle(), id: i};
+                LEVEL_DATA.findComponent("levelProps").selectedItem = null;
+                LEVEL_DATA.findComponent("levelProps").selectedItems = [];
+            }; 
             LEVEL_REGISTRY.set(i, level._data);
             index++; 
         }
         new FlxTimer().start(0.01, first);
+
+        
         
     }
 
     function update(e) {
         super.update(e);        
         get_conductorInUse().update();
+
+        LEVEL_DATA.findComponent("editProp").disabled = SELECTED_PROP == null;
+        LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
+        LEVEL_DATA.findComponent("deleteProp").disabled = SELECTED_PROP == null;
 
         if (FlxG.keys.pressed.ENTER && levelProps[1].shouldBop) {
             for (i in levelProps) {
@@ -297,8 +329,17 @@ class LevelEditor extends MusicBeatState {
         for (i in [titleAssetSprite, levelBackground, blackBar, tracklistText, scoreText, levelTitleText, levelProps].concat(levelProps))
             if (members.contains(i))
                 remove(i);
-
         
+        LEVEL_DATA.findComponent("levelProps").dataSource.clear();
+        for (i in level._data.props) {
+            LEVEL_DATA.findComponent("levelProps").dataSource.add(
+                {
+                    text: NovaConverters.capitalize(i.assetPath.split("/").pop()),
+                    assetPath: i.assetPath
+                }
+            );
+        }
+
         levelBackground = level.buildBackground();
         levelBackground.y = MENU_BAR.height + 56;
         
