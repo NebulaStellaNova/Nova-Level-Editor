@@ -36,6 +36,10 @@ import StringTools;
 import Reflect;
 import Math;
 
+
+import haxe.ui.containers.dialogs.OpenFileDialog;
+import haxe.ui.containers.dialogs.FileDialogTypes;
+
 using StringTools;
 
 class LevelEditor extends MusicBeatState {
@@ -101,6 +105,16 @@ class LevelEditor extends MusicBeatState {
         LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));   
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
         LEVEL_DATA.screenCenter();
+        LEVEL_DATA.x = FlxG.width - LEVEL_DATA.width - 20;
+
+        var editPropButton = LEVEL_DATA.findComponent("editProp");
+        var editPropCallback = ()->{
+            var EDIT_PROP = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/editProp"));   
+            WINDOW_MANAGER.addWindow(EDIT_PROP);
+            EDIT_PROP.screenCenter();
+            EDIT_PROP.x = 20;
+        }
+        editPropButton.onClick = editPropCallback;
 
         var levelDropdown = LEVEL_DATA.findComponent("levelDropdown");
         var levelDropdownCallback = ()->{
@@ -142,10 +156,11 @@ class LevelEditor extends MusicBeatState {
 
         var titleAsset = LEVEL_DATA.findComponent("titleAsset");
         var titleAssetCallback = ()->{
+            titleAssetOverlay.visible = false;
+            if (titleAsset.text == "") return;
             if (NovaUtils.checkImageExists("storymenu/titles/" + titleAsset.text)) {
                 SELECTED_LEVEL._data.titleAsset = "storymenu/titles/" + titleAsset.text;
                 updateTitleSprite();
-                titleAssetOverlay.visible = false;
             } else {
                 titleAssetOverlay.visible = true;
             }
@@ -174,14 +189,18 @@ class LevelEditor extends MusicBeatState {
         }
         levelSongs.onChange = levelSongsCallback;
 
+        var first;
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
-            // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
+            if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
             var level = new Level(i);
             LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: level.getTitle(), id: i});
+            if (index == 0) first = ()->LEVEL_DATA.findComponent("levelDropdown").selectedItem = {text: level.getTitle(), id: i}; 
             LEVEL_REGISTRY.set(i, level._data);
             index++; 
         }
+        new FlxTimer().start(0.01, first);
+        
     }
 
     function update(e) {
@@ -196,6 +215,22 @@ class LevelEditor extends MusicBeatState {
             if (i == null) continue;
             i.cameras = [LEVEL_CAMERA];
         }
+
+        /* if (FlxG.keys.justPressed.I) {
+            var dialog = new OpenFileDialog();
+            dialog.options = {
+                readContents: true,
+                title: "Open Image File",
+                readAsBinary: true,
+                extensions: FileDialogTypes.TEXTS
+            };
+           /*  dialog.onDialogClosed = function(event) {
+                if (event.button == DialogButton.OK) {
+                    updateTabs(dialog.selectedFiles[0].bytes);
+                }
+            } * /
+            dialog.show();
+        } */
 
         /* if (LEVEL_DATA != null) {
             
@@ -323,4 +358,9 @@ class LevelEditor extends MusicBeatState {
     function initStyles() {
         add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));
     }
+
+    /* function formatJSON(string) {
+        string = string.replace()
+        return string;
+    } */
 }

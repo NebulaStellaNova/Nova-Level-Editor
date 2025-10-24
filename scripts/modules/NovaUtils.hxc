@@ -4,7 +4,7 @@ import funkin.modding.PolymodHandler;
 
 class NovaUtils {
     public static function checkImageExists(id:String) {
-        if (id == "") return false;
+        if (id == "" || FileUtil.directoryExists(id)) return false;
         var fileExists = false;
         var foldersToCheck = [
             "assets/"

@@ -1,4 +1,4 @@
-<window title="Level Data" width="400" maximizable="false" minimizable="false" collapsable="false" closable="false" draggable="true">
+<window title="Level Data" width="300" maximizable="false" minimizable="false" collapsable="false" closable="false" draggable="true">
 
     <vbox width="100%">
         <dropdown id="levelDropdown" text="Select a Level (Week)" width="100%" searchable="true" tooltip="Choose a Level."/>
@@ -45,4 +45,9 @@
         </listview>
     </vbox>
 
+    <spacer height="2"/>
+    <button id="editProp" text="Edit Selected Prop" width="100%"/>
+
+    <!-- <spacer height="2"/>
+    <button text="Preview JSON" width="100%"/> -->
 </window>
