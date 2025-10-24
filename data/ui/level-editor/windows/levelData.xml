@@ -10,11 +10,14 @@
                       <!-- Added a space to stop bugging out ^ -->
         
         <label text="Title Asset:" style="padding: 2px;" verticalAlign="center"/>
-        <textfield  id="titleAsset" placeholder="week1 " width="100%" verticalAlign="center" validator="required" tooltip="The graphic for the level, as seen in the scrolling list."/>
+        <textfield  id="titleAsset" placeholder="week1 " width="100%" verticalAlign="center" validator="required" tooltip="The graphic for the level, as seen in the scrolling list. Images must be in 'storymenu\titles\'"/>
                <!-- Added a space to stop bugging out ^ -->
         
         <label text="Background:" style="padding: 2px;" verticalAlign="center"/>
-        <textfield  id="backgroundAsset" placeholder="#F9CF51 " width="100%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a HEX Code Color or an Image.)"/>
+        <hbox width="100%">
+            <textfield  id="backgroundAsset" placeholder="#F9CF51 " width="75%" verticalAlign="center" validator="required" tooltip="The background for the level behind the props. (Can be a HEX Code Color or an Image.)"/>
+            <color-picker-popup id="backgroundColorPicker" width="25%" height="100%" />
+        </hbox>
                       <!-- Added a space to stop bugging out ^ -->
 
         <label text="Songs:" style="padding: 2px;" verticalAlign="center"/>

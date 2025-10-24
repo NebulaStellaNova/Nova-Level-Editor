@@ -1,5 +1,19 @@
 <window title="Prop Data" width="300" maximizable="false" minimizable="false" collapsable="false" closable="false" draggable="true">
     <!-- Body -->
+    <!-- 
+        var assetPath:String;
+        var scale:Float;
+        var alpha:Float;
+        var isPixel:Bool;
+        var danceEvery:Float;
+        var offsets:Array<Float>;
+        var animations:Array<AnimationData>;
+    -->
+
+    <grid width="100%">
+        <label text="Asset Path:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="assetPath" width="100%" verticalAlign="center" validator="required" tooltip="Asset path for the prop."/>   
+    </grid>
 
     <!-- Footer -->
     <hbox width="100%">

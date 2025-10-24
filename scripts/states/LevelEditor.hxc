@@ -12,6 +12,8 @@ import funkin.ui.FullScreenScaleMode;
 
 import haxe.ui.data.ArrayDataSource;
 
+import funkin.audio.FunkinSound;
+
 import funkin.ui.MusicBeatState;
 
 import funkin.ui.story.Level;
@@ -21,7 +23,6 @@ import funkin.util.Constants;
 import flixel.util.FlxColor;
 
 import flixel.util.FlxTimer;
-
 
 import funkin.input.Cursor;
 
@@ -176,6 +177,7 @@ class LevelEditor extends MusicBeatState {
                 titleAssetOverlay.visible = true;
             }
         }
+
         titleAsset.onChange = titleAssetCallback;
 
         titleAssetOverlay = new FunkinSprite(113, 110).makeGraphic(titleAsset.width - 2, titleAsset.height - 2, FlxColor.RED);
@@ -191,6 +193,11 @@ class LevelEditor extends MusicBeatState {
         }
         backgroundAssetE.onChange = backgroundAssetECallback;
 
+        var backgroundColorPicker = LEVEL_DATA.findComponent("backgroundColorPicker");
+        backgroundColorPicker.onChange = ()->{
+            backgroundAssetE.text = FlxColor.toWebString(backgroundColorPicker.selectedItem);
+        }
+
         var levelSongs = LEVEL_DATA.findComponent("levelSongs");
         var levelSongsCallback = ()->{
             var songList = levelSongs.text;
@@ -200,10 +207,15 @@ class LevelEditor extends MusicBeatState {
         }
         levelSongs.onChange = levelSongsCallback;
 
+        var isVisible = LEVEL_DATA.findComponent("levelIsVisible");
+        var isVisibleCallback = isVisible.onClick = ()->{
+            SELECTED_LEVEL._data.visible = isVisible.selected;
+        }
+
         var first;
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
-            if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
+            // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
             var level = new Level(i);
             LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: level.getTitle(), id: i});
             if (index == 0) first = ()->LEVEL_DATA.findComponent("levelDropdown").selectedItem = {text: level.getTitle(), id: i}; 
@@ -218,9 +230,17 @@ class LevelEditor extends MusicBeatState {
         super.update(e);        
         get_conductorInUse().update();
 
-        if (FlxG.keys.justPressed.ENTER) {
-
+        if (FlxG.keys.pressed.ENTER && levelProps[1].shouldBop) {
+            for (i in levelProps) {
+                i.shouldBop = false;
+                i.playConfirm();
+                new FlxTimer().start(1, ()->i.shouldBop = true);
+            }
+            FunkinSound.playOnce(Paths.sound('confirmMenu'));
         }
+
+        if (titleAssetSprite != null)
+            titleAssetSprite.alpha = SELECTED_LEVEL.isVisible() ? 1 : 0.5;
 
         for (i in [titleAssetSprite, levelBackground, blackBar, tracklistText, scoreText, levelTitleText].concat(levelProps)) {
             if (i == null) continue;
