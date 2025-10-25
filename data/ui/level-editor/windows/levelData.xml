@@ -35,7 +35,7 @@
 
     <vbox width="100%">
         <label text="Props:" style="padding: 2px;" verticalAlign="center" tooltip="The props to display over the colored background or image\nIn the base game this is usually Boyfriend and the opponent."/>
-        <listview id="levelProps" width="100%" selectedIndex="0">
+        <listview id="levelProps" width="100%" selectedIndex="0" height="100">
             <!-- <item-renderer width="100%" layout="horizontal">
                <label id="text" width="100%" verticalAlign="center" />
                <checkbox id="visible" selected="true" />
