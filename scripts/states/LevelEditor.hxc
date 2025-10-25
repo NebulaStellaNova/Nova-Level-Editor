@@ -432,6 +432,8 @@ class LevelEditor extends MusicBeatState {
         
     }
 
+    var prev = FlxG.sound.volume;
+    var prevMute = FlxG.sound.muted;
     function update(e) {
         super.update(e);        
         get_conductorInUse().update();
@@ -443,6 +445,14 @@ class LevelEditor extends MusicBeatState {
         if (FlxG.mouse.justReleased) {
             checkWindowOffScreen(LEVEL_DATA);
             checkWindowOffScreen(EDIT_PROP);
+        }
+
+        if (prev != FlxG.sound.volume) {
+            FlxG.sound.volume = prev;
+        }
+        if (prevMute != FlxG.sound.muted) {
+            FlxG.sound.muted = prevMute;
+            FlxG.sound.volume = prev;
         }
         
 
