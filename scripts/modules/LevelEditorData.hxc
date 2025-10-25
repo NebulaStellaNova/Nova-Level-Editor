@@ -10,7 +10,7 @@ class LevelEditorData extends Module {
     public function new() {
         super('LevelEditorData');
         for (i in PolymodHandler.getAllMods()) {
-            if (i.title == "Nova Level Editor") {
+            if (i.title == "Nova Level Creator") {
                 LevelEditorData.EDITOR_TITLE = i.title;
                 LevelEditorData.EDITOR_FOLDER = i.id;
                 LevelEditorData.EDITOR_VERSION = i.modVersion.version.join(".");

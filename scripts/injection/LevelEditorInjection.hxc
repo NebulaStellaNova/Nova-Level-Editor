@@ -11,7 +11,7 @@ class LevelEditorInjection extends Module
 	{
 		if (Std.isOfType(event.targetState, DebugMenuSubState))
 		{
-			event.targetState.createItem("Nova Level Editor", ()->FlxG.switchState(ScriptedMusicBeatState.init('LevelEditor')));
+			event.targetState.createItem("Nova Level Creator", ()->FlxG.switchState(new LevelEditor()));
 		}
 	}
 

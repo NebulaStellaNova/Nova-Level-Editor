@@ -2,6 +2,9 @@ import funkin.util.FileUtil;
 
 import funkin.modding.PolymodHandler;
 
+import StringTools;
+import Std; 
+
 class NovaUtils {
     public static function checkImageExists(id:String) {
         if (id == "" || FileUtil.directoryExists(id)) return false;
@@ -23,5 +26,17 @@ class NovaUtils {
         }
 
         return fileExists;
+    }
+
+    public static function stringToIndices(string:String):Array<Int> {
+        if (string == null) return [];
+        string = StringTools.replace(string, " ", "");
+        var split = string.split(",");
+        var indices = [];
+        for (i in split) {
+            if (Std.parseInt(i) != null)
+                indices.push(Std.parseInt(i));
+        }
+        return indices;
     }
 }

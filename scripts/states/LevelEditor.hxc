@@ -69,6 +69,7 @@ class LevelEditor extends MusicBeatState {
     // -- UI Elements -- \\
     var MENU_BAR;
     var LEVEL_DATA;
+    var EDIT_PROP;
     
     // -- Other Stuff -- \\
     public var WINDOW_MANAGER:WindowManager = new WindowManager(); // nigger - genzu
@@ -109,23 +110,174 @@ class LevelEditor extends MusicBeatState {
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
         LEVEL_DATA.screenCenter();
         LEVEL_DATA.x = FlxG.width - LEVEL_DATA.width - 20;
+        LEVEL_DATA.y += MENU_BAR.height/2;
 
         var editPropButton = LEVEL_DATA.findComponent("editProp");
         var editPropCallback = ()->{ 
             if (SELECTED_PROP == null) return;
             LEVEL_DATA.disabled = true;
-            var EDIT_PROP = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/editProp"));   
+            EDIT_PROP = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/editProp"));   
             WINDOW_MANAGER.addWindow(EDIT_PROP);
             EDIT_PROP.screenCenter();
             EDIT_PROP.x = 20;
+            EDIT_PROP.y += MENU_BAR.height/2;
+
+            // EDIT_PROP.addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/idlePart")));
+            // EDIT_PROP.addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/footerPart")));
+
+            var dataToApply = {
+                assetPath: SELECTED_PROP.propData.assetPath.replace("storymenu/props/", ""),
+                scale: SELECTED_PROP.propData.scale,
+                alpha: SELECTED_PROP.propData.alpha,
+                danceEvery: SELECTED_PROP.propData.danceEvery,
+                offsets: [
+                    SELECTED_PROP.propData.offsets[0],
+                    SELECTED_PROP.propData.offsets[1]
+                ],
+                isPixel: SELECTED_PROP.propData.isPixel,
+                animations: SELECTED_PROP.propData.animations
+            }
 
             EDIT_PROP.findComponent("assetPath").text = SELECTED_PROP.propData.assetPath.replace("storymenu/props/", "");
             EDIT_PROP.findComponent("scale").pos = SELECTED_PROP.propData.scale;
             EDIT_PROP.findComponent("alpha").pos = SELECTED_PROP.propData.alpha;
             EDIT_PROP.findComponent("danceEvery").pos = SELECTED_PROP.propData.danceEvery;
             EDIT_PROP.findComponent("offsetX").pos = SELECTED_PROP.propData.offsets[0];
-            EDIT_PROP.findComponent("offsetY").pos = SELECTED_PROP.propData.offsets[0];
+            EDIT_PROP.findComponent("offsetY").pos = SELECTED_PROP.propData.offsets[1];
             EDIT_PROP.findComponent("isPixel").selected = SELECTED_PROP.propData.isPixel;
+            EDIT_PROP.findComponent("hasConfirmAnim").selected = false;
+            var refreshAnimations = ()->{
+                for (w in EDIT_PROP.findComponent('ac1').members) {
+                    for (o in 0...100) {
+                        for (i in 0...100) {
+                            EDIT_PROP.findComponent('ac1').removeComponentAt(i);
+                        }
+                    }
+                }
+
+                var applyData = (name, i) -> {
+                    EDIT_PROP.findComponent(name + 'Prefix').text = i.prefix;
+                    EDIT_PROP.findComponent(name + 'Indices').text = i.frameIndices.join(", ");
+                    EDIT_PROP.findComponent(name + 'OffsetX').pos = i.offsets[0];
+                    EDIT_PROP.findComponent(name + 'OffsetY').pos = i.offsets[1];
+                    EDIT_PROP.findComponent(name + 'FrameRate').pos = i.frameRate;
+                    EDIT_PROP.findComponent(name + 'FlipX').selected = i.flipX;
+                    EDIT_PROP.findComponent(name + 'FlipY').selected = i.flipY;
+                    EDIT_PROP.findComponent(name + 'Looped').selected = i.looped;
+                    
+                    EDIT_PROP.findComponent(name + 'Prefix').onChange = ()->{
+                        i.prefix = EDIT_PROP.findComponent(name + 'Prefix').text;
+                    };
+                    EDIT_PROP.findComponent(name + 'Indices').onChange = ()->{
+                        i.frameIndices = NovaUtils.stringToIndices(EDIT_PROP.findComponent(name + 'Indices').text);
+                    };
+                    EDIT_PROP.findComponent(name + 'OffsetX').onChange = ()->{
+                        i.offsets[0] = EDIT_PROP.findComponent(name + 'OffsetX').pos;
+                    };
+                    EDIT_PROP.findComponent(name + 'OffsetY').onChange = ()->{
+                        i.offsets[1] = EDIT_PROP.findComponent(name + 'OffsetY').pos;
+                    };
+                    EDIT_PROP.findComponent(name + 'FrameRate').onChange = ()->{
+                        i.frameRate = EDIT_PROP.findComponent(name + 'FrameRate').pos;
+                    };
+                    EDIT_PROP.findComponent(name + 'FlipX').onChange = ()->{
+                        i.flipX = EDIT_PROP.findComponent(name + 'FlipX').selected;
+                    };
+                    EDIT_PROP.findComponent(name + 'FlipY').onChange = ()->{
+                        i.flipY = EDIT_PROP.findComponent(name + 'FlipY').selected;
+                    };
+                    EDIT_PROP.findComponent(name + 'Looped').onChange = ()->{
+                        i.looped = EDIT_PROP.findComponent(name + 'Looped').selected;
+                    };
+                }
+
+                for (i in dataToApply.animations) {
+                    if (i.name == "idle") {
+                        EDIT_PROP.findComponent('ac1').addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/idlePart")));
+                        applyData('idle', i);
+                    } else if (i.name == "confirm") {
+                        if (EDIT_PROP.findComponent("hasConfirmAnim").selected) {
+                            EDIT_PROP.findComponent('ac1').addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/confirmPart")));
+                            applyData('confirm', i);
+                        }
+                    } else if (i.name == "danceLeft") {
+                        EDIT_PROP.findComponent('ac1').addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/danceLeftPart")));
+                        applyData('danceLeft', i);
+                    } else if (i.name == "danceRight") {
+                        EDIT_PROP.findComponent('ac1').addComponent(RuntimeComponentBuilder.build(Paths.ui("level-editor/parts/danceRightPart")));
+                        applyData('danceRight', i);
+                    }
+                }
+            }
+            refreshAnimations();
+
+            var alternateCount = 0;
+            for (i in SELECTED_PROP.propData.animations) {
+                if (i.name == "confirm")
+                    EDIT_PROP.findComponent("hasConfirmAnim").selected = true;
+
+                if (i.name == "danceLeft" || i.name == "danceRight") alternateCount++;
+            }
+
+            if (alternateCount >= 2)
+                EDIT_PROP.findComponent("alternate").selected = true;
+
+            EDIT_PROP.findComponent("assetPath").onChange = ()->{
+                dataToApply.assetPath = "storymenu/props/" + EDIT_PROP.findComponent("assetPath").text;
+            }
+
+            EDIT_PROP.findComponent("scale").onChange = ()->{
+                dataToApply.scale = EDIT_PROP.findComponent("scale").pos;
+            }
+
+            EDIT_PROP.findComponent("alpha").onChange = ()->{
+                dataToApply.alpha = EDIT_PROP.findComponent("alpha").pos;
+            }
+            
+            EDIT_PROP.findComponent("danceEvery").onChange = ()->{
+                dataToApply.danceEvery = EDIT_PROP.findComponent("danceEvery").pos;
+            }
+
+            EDIT_PROP.findComponent("offsetX").onChange = ()->{
+                dataToApply.offsets[0] = EDIT_PROP.findComponent("offsetX").pos;
+            }
+
+            EDIT_PROP.findComponent("offsetY").onChange = ()->{
+                dataToApply.offsets[1] = EDIT_PROP.findComponent("offsetY").pos;
+            }
+
+            EDIT_PROP.findComponent("isPixel").onChange = ()->{
+                dataToApply.isPixel = EDIT_PROP.findComponent("isPixel").selected;
+            }
+
+            EDIT_PROP.findComponent('alternate').onChange = ()->{
+                if (EDIT_PROP.findComponent('alternate').selected) {
+                    removeAnimationFromArray(dataToApply.animations, 'idle');
+                    if (!hasAnimationInArray(dataToApply.animations, 'danceRight')) {
+                        dataToApply.animations.insert(0, getBlankAnim('danceRight'));
+                    }
+                    if (!hasAnimationInArray(dataToApply.animations, 'danceLeft')) {
+                        dataToApply.animations.insert(0, getBlankAnim('danceLeft'));
+                    }
+                } else {
+                    removeAnimationFromArray(dataToApply.animations, 'danceLeft');
+                    removeAnimationFromArray(dataToApply.animations, 'danceRight');
+                    if (!hasAnimationInArray(dataToApply.animations, 'idle')) {
+                        dataToApply.animations.insert(0, getBlankAnim('idle'));
+                    }
+                }
+                refreshAnimations();
+            }
+
+            EDIT_PROP.findComponent("hasConfirmAnim").onChange = ()->{
+                if (EDIT_PROP.findComponent("hasConfirmAnim").selected) {
+                    if (!hasAnimationInArray(dataToApply.animations, 'confirm')) {
+                        dataToApply.animations.push(getBlankAnim('confirm'));
+                    }
+                }
+                // EDIT_PROP.findComponent("confirm").disabled = !EDIT_PROP.findComponent("hasConfirmAnim").selected;
+                refreshAnimations();
+            }
             
             EDIT_PROP.findComponent("close").onClick = ()->{
                 LEVEL_DATA.disabled = false;
@@ -133,9 +285,17 @@ class LevelEditor extends MusicBeatState {
             }
             
             EDIT_PROP.findComponent("apply").onClick = ()->{
+                if (!EDIT_PROP.findComponent("hasConfirmAnim").selected) {
+                    removeAnimationFromArray(dataToApply.animations, 'confirm');
+                }
+
+                var id = LEVEL_DATA.findComponent("levelProps").selectedItem.id;
+                SELECTED_LEVEL._data.props[LEVEL_DATA.findComponent("levelProps").selectedItem.id] = dataToApply;
                 LEVEL_DATA.disabled = false;
                 WINDOW_MANAGER.closeWindow(EDIT_PROP);
                 loadLevel(SELECTED_LEVEL);
+
+                forceSelectProp(id);
             }
         }
         editPropButton.onClick = editPropCallback;
@@ -160,13 +320,16 @@ class LevelEditor extends MusicBeatState {
             LEVEL_DATA.findComponent("levelIsVisible").selected = SELECTED_LEVEL.isVisible();
 
             LEVEL_DATA.findComponent("levelProps").dataSource.clear();
+            var propID = 0;
             for (i in SELECTED_LEVEL._data.props) {
                 LEVEL_DATA.findComponent("levelProps").dataSource.add(
                     {
                         text: NovaConverters.capitalize(i.assetPath.split("/").pop()),
-                        assetPath: i.assetPath
+                        assetPath: i.assetPath,
+                        id: propID
                     }
                 );
+                propID++;
             }
         }
         levelDropdown.onChange = levelDropdownCallback;
@@ -234,6 +397,21 @@ class LevelEditor extends MusicBeatState {
             }
         }
 
+        var createProp = LEVEL_DATA.findComponent("createProp");
+        var createPropCallback = createProp.onClick = ()->{
+            SELECTED_LEVEL._data.props.push(newProp());
+            loadLevel(SELECTED_LEVEL);
+            forceSelectProp(SELECTED_LEVEL._data.props.length - 1);
+        }
+
+        var deleteProp = LEVEL_DATA.findComponent("deleteProp");
+        var deletePropCallback = deleteProp.onClick = ()->{
+            if (SELECTED_PROP == null) return;
+            SELECTED_LEVEL._data.props.remove(SELECTED_LEVEL._data.props[LEVEL_DATA.findComponent("levelProps").selectedItem.id]);
+            loadLevel(SELECTED_LEVEL);
+            forceSelectProp(SELECTED_LEVEL._data.props.length - 1);
+        }
+
         var first;
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
@@ -261,6 +439,12 @@ class LevelEditor extends MusicBeatState {
         LEVEL_DATA.findComponent("editProp").disabled = SELECTED_PROP == null;
         LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
         LEVEL_DATA.findComponent("deleteProp").disabled = SELECTED_PROP == null;
+
+        if (FlxG.mouse.justReleased) {
+            checkWindowOffScreen(LEVEL_DATA);
+            checkWindowOffScreen(EDIT_PROP);
+        }
+        
 
         if (FlxG.keys.pressed.ENTER && levelProps[1].shouldBop) {
             for (i in levelProps) {
@@ -331,13 +515,16 @@ class LevelEditor extends MusicBeatState {
                 remove(i);
         
         LEVEL_DATA.findComponent("levelProps").dataSource.clear();
+        var propIndex = 0;
         for (i in level._data.props) {
             LEVEL_DATA.findComponent("levelProps").dataSource.add(
                 {
                     text: NovaConverters.capitalize(i.assetPath.split("/").pop()),
-                    assetPath: i.assetPath
+                    assetPath: i.assetPath,
+                    id: propIndex
                 }
             );
+            propIndex++;
         }
 
         levelBackground = level.buildBackground();
@@ -427,8 +614,74 @@ class LevelEditor extends MusicBeatState {
         add(levelBackground);
     }
 
+    function checkWindowOffScreen(window) {
+        if (window == null || FlxG.mouse.pressed) return;
+        if (window.left < 0)
+            window.x = 0;
+
+        if (window.top < 0)
+            window.y = 0;
+
+        if (window.left > FlxG.width - window.width)
+            window.x = FlxG.width - window.width;
+
+        if (window.top > FlxG.height - window.height)
+            window.y = FlxG.height - window.height;
+    }
+
+    function getBlankAnim(name) {
+        return {
+            name: name,
+            prefix: '',
+            assetPath: '',
+            offsets: [0, 0],
+            looped: false,
+            flipX: false,
+            flipY: false,
+            frameRate: 24,
+            frameIndices: []
+        }
+    }
+    
+    function hasAnimationInArray(array, name) {
+        var has = false;
+        for (i in array) {
+            if (i.name == name) has = true;
+        }
+        return has;
+    }
+
+    function removeAnimationFromArray(array, name) {
+        for (i in array)
+            if (i.name == name) array.remove(i);
+    }
+
     function initStyles() {
         add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));
+    }
+
+    function newProp() {
+        return { 
+            assetPath: "prop",
+            scale: 1,
+            alpha: 1,
+            isPixel: false,
+            danceEvery: 1,
+            offsets: [0, 0],
+            animations: [getBlankAnim("idle")]
+        }
+    }
+
+    function forceSelectProp(index) {
+        var id = index;
+        SELECTED_PROP = null;
+        LEVEL_DATA.findComponent("levelProps").selectedItem = null;
+        LEVEL_DATA.findComponent("levelProps").selectedItems = [];
+        new FlxTimer().start(0.01, ()->{
+            SELECTED_PROP = levelProps[id];
+            LEVEL_DATA.findComponent("levelProps").selectedItem = LEVEL_DATA.findComponent("levelProps").dataSource.get(id);
+            LEVEL_DATA.findComponent("levelProps").selectedItems = [LEVEL_DATA.findComponent("levelProps").dataSource.get(id)];
+        });
     }
 
     /* function formatJSON(string) {
