@@ -68,6 +68,14 @@
         <box text="Change Log">
             <scroll-view width="449" height="445" contentWidth="100%">
                 <vbox>
+                    <frame text="v1.0.1" width="425">
+                        <vbox>
+                            <label text="—— Fixes ——" />
+                            <spacer />
+                            <label text="• Fix editor not letting you make a new prop if you have\n  none." />
+                            <spacer />
+                        </vbox>
+                    </frame>
                     <frame text="v1.0.0" width="425">
                         <vbox>
                             <label text="—— Additions ——" />

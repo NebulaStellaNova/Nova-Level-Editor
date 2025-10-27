@@ -574,7 +574,7 @@ class LevelEditor extends MusicBeatState {
         get_conductorInUse().update();
 
         LEVEL_DATA.findComponent("editProp").disabled = SELECTED_PROP == null;
-        LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
+        // LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
         LEVEL_DATA.findComponent("deleteProp").disabled = SELECTED_PROP == null;
 
         if (FlxG.mouse.justReleased) {
