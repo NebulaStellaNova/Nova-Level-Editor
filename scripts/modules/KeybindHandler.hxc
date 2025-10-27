@@ -1,0 +1,54 @@
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import Reflect;
+
+class KeybindHandler extends Module {
+    public var keybinds = [];
+
+    public function new() {
+        super('KeybindHandler');
+    }
+
+    private static var keybinds = [];
+
+    public static function addKeybind(keys:Array<String>, action:Void->Void, ?type:String) {
+        keybinds.push(KeybindHandler.createKeybind(keys, action, type));
+    }
+
+    public function onStateChangeBegin(e) {
+        super(e);
+        keybinds = [];
+    }
+
+    public function onUpdate(e) {
+        super(e);
+        for (keybind in KeybindHandler.keybinds) {
+            var pressed = true;
+            var index = 0;
+            //trace(keybind);
+            for (key in keybind.keys) {
+                if (index == keybind.keys.length - 1 && keybind.type != "pressed") {
+                    if (!Reflect.getProperty(FlxG.keys.justPressed, key)) {
+                        pressed = false;
+                    }
+                } else {
+                    if (!Reflect.getProperty(FlxG.keys.pressed, key)) {
+                        pressed = false;
+                    }
+                }
+                index++;
+            }
+            if (pressed) {
+                keybind.action(e.elapsed);
+            }
+        }
+    }
+
+    public static function createKeybind(keys:Array<String>, action:Void->Void, ?type:String) {
+        return {
+            keys: keys,
+            type: type ?? "justPressed",
+            action: action
+        }
+    }
+}

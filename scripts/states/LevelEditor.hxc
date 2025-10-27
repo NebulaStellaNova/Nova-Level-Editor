@@ -1,14 +1,22 @@
 import funkin.modding.base.ScriptedFlxSpriteGroup;
 
+import haxe.ui.notifications.NotificationManager;
+import haxe.ui.notifications.NotificationType;
+
 import haxe.ui.containers.windows.WindowManager;
 
+
 import funkin.data.story.level.LevelRegistry;
+
+import funkin.ui.mainmenu.MainMenuState;
 
 import haxe.ui.RuntimeComponentBuilder;
 
 import funkin.graphics.FunkinSprite;
-
+ 
 import funkin.ui.FullScreenScaleMode;
+
+import funkin.modding.PolymodHandler;
 
 import haxe.ui.data.ArrayDataSource;
 
@@ -22,6 +30,8 @@ import funkin.ui.story.Level;
 import funkin.util.Constants;
 
 import flixel.util.FlxColor;
+
+import funkin.util.FileUtil;
 
 import flixel.util.FlxTimer;
 
@@ -105,6 +115,76 @@ class LevelEditor extends MusicBeatState {
         MENU_BAR = RuntimeComponentBuilder.build(Paths.ui("level-editor/menubar"));
         MENU_BAR.findComponent("menuBarTitle").text = LevelEditorData.EDITOR_TITLE + " v" + LevelEditorData.EDITOR_VERSION;
         add(MENU_BAR);
+
+        var exitToMenuItem = MENU_BAR.findComponent("exitToMenu");
+        var exit = exitToMenuItem.onClick = ()->{
+            FlxG.switchState(new MainMenuState());
+            PolymodHandler.forceReloadAssets();
+		}
+        KeybindHandler.addKeybind(["CONTROL", "Q"], exit);
+
+        var newLevel = MENU_BAR.findComponent("newLevel");
+        var newLevelCallback = newLevel.onClick = ()->{
+            var newLevelDialog = RuntimeComponentBuilder.build(Paths.ui("level-editor/dialogs/newLevelDialog"));
+            // add(newLevelDialog);
+            newLevelDialog.screenCenter();
+            newLevelDialog.showDialog(true);
+            cancelInput = true;
+
+            for (i in PolymodHandler.getAllMods()) {
+                newLevelDialog.findComponent("modFolderList").dataSource.add({ text: i.title + " (" + i.id + ")" });
+            }
+            newLevelDialog.findComponent("modFolderList").selectedItem = { text: "None" };
+
+            var cancelButton = newLevelDialog.findComponent("dialogCancel");
+            cancelButton.onClick = ()->{
+                cancelInput = false;
+                newLevelDialog.hide();
+            }
+
+            var continueButton = newLevelDialog.findComponent("dialogContinue");
+            continueButton.onClick = ()->{
+                var continu = true;
+                if (newLevelDialog.findComponent("modFolderList").text == "None") {
+                    newNotification("Error!", 'Could not create level!\nPlease select a mod folder first.', NotificationType.Error, 5000);
+                    continu = false;
+                } else if (newLevelDialog.findComponent("stageNameField").text == "" || newLevelDialog.findComponent("stageNameField").text == null) {
+                    newNotification("Error!", 'Could not create level!\nLevel Name must not be empty.', NotificationType.Error, 5000);
+                    continu = false;
+                } else if (newLevelDialog.findComponent("fileNameField").text == "" || newLevelDialog.findComponent("fileNameField").text == null) {
+                    newNotification("Error!", 'Could not create level!\nFile Name must not be empty.', NotificationType.Error, 5000);
+                    continu = false;
+                }
+
+                if (continu) {
+                    for (i in PolymodHandler.getAllMods()) {
+                        if (i.title + " (" + i.id + ")" == newLevelDialog.findComponent("modFolderList").text) {
+                            var levelID = newLevelDialog.findComponent("fileNameField").text;
+                            var path = "mods/" + i.id + "/data/levels/" + levelID + ".json";
+                            
+                            var levelToSave = blankLevel();
+                            levelToSave.name = newLevelDialog.findComponent("stageNameField").text;
+                            FileUtil.writeStringToPath(path, levelToString({_data: levelToSave}));
+                        
+
+                            LEVEL_REGISTRY.set(levelID, levelToSave);
+                            LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: levelToSave.name, id: levelID});
+                            
+                            /* stageList.dataSource.add({ text: newLevelDialog.findComponent("stageNameField").text, id: newLevelDialog.findComponent("fileNameField").text });
+                            customStageRegistry.set(newLevelDialog.findComponent("fileNameField").text, stageToSave._data);
+
+                            stageList.selectedItem = { text: newLevelDialog.findComponent("stageNameField").text, id: newLevelDialog.findComponent("fileNameField").text }; */
+
+                            // newNotification("Success!", 'Successfully created stage "' + newLevelDialog.findComponent("stageNameField").text + '"', NotificationType.Success, 5000);
+                        } 
+                    }
+
+                    cancelInput = false;
+                    newLevelDialog.hide();
+                }
+            }
+        }
+
 
         LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));   
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
@@ -389,6 +469,7 @@ class LevelEditor extends MusicBeatState {
 
         var levelPropList = LEVEL_DATA.findComponent("levelProps");
         var levelPropListCallback = levelPropList.onClick = ()->{
+            if (levelPropList.selectedItem == null) return;
             for (i in levelProps) {
                 if (i.propData.assetPath == levelPropList.selectedItem.assetPath) {
                     SELECTED_PROP = i;
@@ -428,8 +509,11 @@ class LevelEditor extends MusicBeatState {
         }
         new FlxTimer().start(0.01, first);
 
-        
-        
+        notificationManager.addNotification({
+            title: "Welcome!",
+            body: "Welcome to the Nova Stage Editor! Press F1 for a user guide.",
+            type: NotificationType.Default
+        });
     }
 
     var prev = FlxG.sound.volume;
@@ -437,6 +521,10 @@ class LevelEditor extends MusicBeatState {
     function update(e) {
         super.update(e);        
         get_conductorInUse().update();
+
+        if (FlxG.keys.justPressed.I) {
+            trace(levelToString(SELECTED_LEVEL));
+        }
 
         LEVEL_DATA.findComponent("editProp").disabled = SELECTED_PROP == null;
         LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
@@ -670,6 +758,19 @@ class LevelEditor extends MusicBeatState {
         add(RuntimeComponentBuilder.build(Paths.ui("level-editor/styles/main")));
     }
 
+    function blankLevel() {
+        return {
+            version: "1.0.0",
+            titleAsset: "storymenu/titles/tutorial",
+            songs: [],
+            visible: true,
+            background: "#F9CF51",
+            name: "NEW LEVEL",
+            props: [newProp()],
+            generatedBy: ""
+        }
+    }
+
     function newProp() {
         return { 
             assetPath: "prop",
@@ -691,6 +792,23 @@ class LevelEditor extends MusicBeatState {
             SELECTED_PROP = levelProps[id];
             LEVEL_DATA.findComponent("levelProps").selectedItem = LEVEL_DATA.findComponent("levelProps").dataSource.get(id);
             LEVEL_DATA.findComponent("levelProps").selectedItems = [LEVEL_DATA.findComponent("levelProps").dataSource.get(id)];
+        });
+    }
+
+    function levelToString(level) {
+        var levelData = Json.parse(Json.stringify(level._data));
+        levelData.generatedBy = LevelEditorData.EDITOR_TITLE + " v" + LevelEditorData.EDITOR_VERSION;
+        return Json.stringify(levelData, null, "\t");
+    }
+
+    var notificationManager = new NotificationManager();
+    function newNotification(title:String, body:String, ?type, ?expiryMs, ?actions) {
+        notificationManager.addNotification({
+            title: title,
+            body: body,
+            type: type ?? NotificationType.Default,
+            expiryMs: expiryMs ?? null,
+            actions: actions ?? []
         });
     }
 

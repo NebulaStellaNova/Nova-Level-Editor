@@ -29,9 +29,9 @@
     <menu-item id="LevelDataWindow" text="Level Data" />
   </menu> -->
 
-    <menu text="View" width="300">
+    <!-- <menu text="View" width="300">
         <menu-item id="uiSwap" text="Swap UI Side" />
-    </menu>
+    </menu> -->
 
     <menu text="Audio" width="300">
         <menu text="Editor Music">
@@ -50,7 +50,7 @@
         </vbox>
     </menu>
 
-    <menu text="Converters" width="300">
+    <menu text="Converters (Coming Soon)" width="300" disabled="true">
         <menu-item text="Codename Engine to V-Slice" disabled="false" id="fromCNE"/>
         <menu-item text="Psych Engine to V-Slice" disabled="false" id="fromPsych"/>
         <menu-separator disabled="true"/>

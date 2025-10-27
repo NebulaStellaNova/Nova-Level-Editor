@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialog id="modDialog" width="600" height="400" title="Save Level As" closable="false">
+	<vbox width="100%" height="100%">
+		<label text="Choose Mod To Save Level In:" style="padding: 2px;" verticalAlign="center"/>
+		<dropdown id="modFolderList" text="None" width="100%" searchable="true">
+            <data>
+                <item text="None"/>
+            </data>
+        </dropdown>
+
+		<label text="Level Name:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield  id="stageNameField" placeholder="Level Name" width="100%" verticalAlign="center" validator="required" tooltip="Name of the level in-game."/>
+
+		<label text="File Name:" style="padding: 2px;" verticalAlign="center"/>
+        <textfield id="fileNameField" placeholder="File Name / Level ID" width="100%" verticalAlign="center" validator="required" tooltip="Name of the level file / The ID for the level."/>  
+
+	</vbox>
+	<footer>
+		<hbox>
+			<button text="Cancel" id="dialogCancel"/>
+			<spacer width="410" />
+			<button text="Save Level" id="dialogContinue"/>
+		</hbox>
+	</footer>
+</dialog>
