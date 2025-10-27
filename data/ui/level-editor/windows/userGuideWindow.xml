@@ -1,0 +1,161 @@
+<window title="User Guide" width="500" height="600" maximizable="false" minimizable="false"
+    collapsable="false" closable="false">
+    <style>
+        .discord-card {
+        background: #313234;
+        border-radius: 10px;
+        }
+
+        .discord-button {
+        background: #00863a;
+        border: none;
+        border-radius: 15px;
+        color: white;
+        font-name:'fonts/gintoRegular.ttf';
+        }
+
+        .discord-button:hover {
+        background: #057834
+        }
+
+        .discord-button:down {
+        background: #02662c
+        }
+    </style>
+
+    <tabview id="tv2" width="100%" height="100%">
+        <box text="Guide">
+            <vbox width="100%">
+                <label
+                    text="Welcome to the User Guide for the Nova Level Editor! In the \nUser Guide you'll be able to learn basic use and functionality \nof the Level Editor. Not only that but you'll also find useful \ntips and tricks you can use while creating/editing levels."
+                    style="padding: 2px;" verticalAlign="center" />
+                <spacer height="10" />
+                <label text="To get started, click on one of the taps at the top of window!"
+                    style="padding: 2px;" verticalAlign="center" />
+                <spacer height="310" />
+                <label text="- GENZU" style="padding: 2px;" verticalAlign="center" />
+            </vbox>
+        </box>
+
+        <box text="Keybinds">
+            <tableview width="450" height="445" contentWidth="100%">
+                <header width="100%">
+                    <column id="action" text="Action" width="50%" />
+                    <column id="keybind" text="Keybind" width="50%" />
+                </header>
+                <data>
+                    <item action="Show User Guide" keybind="F1" />
+                    <item action="New Level" keybind="Ctrl + N" />
+                    <item action="Save Level" keybind="Ctrl + S" />
+                    <item action="Exit To Menu" keybind="Ctrl + Q" />
+                </data>
+            </tableview>
+        </box>
+
+        <box text="Credits">
+            <tableview width="450" height="445" contentWidth="100%">
+                <header width="100%">
+                    <column id="action" text="Name" width="50%" />
+                    <column id="keybind" text="Role" width="50%" />
+                </header>
+                <data>
+                    <item action="Nebula S. Nova" keybind="Main Coder, Lofi Freaky Menu" />
+                    <item action="GENZU" keybind="Coded The UI" />
+                </data>
+            </tableview>
+        </box>
+
+        <box text="Change Log">
+            <scroll-view width="449" height="445" contentWidth="100%">
+                <vbox>
+                    <frame text="v1.0.0" width="425">
+                        <vbox>
+                            <label text="—— Additions ——" />
+                            <spacer />
+                            <label text="• Initial Release." />
+                            <spacer />
+                        </vbox>
+                    </frame>
+                </vbox>
+            </scroll-view>
+        </box>
+
+        <!-- <box text="To-Do">
+            <vbox>
+                <label text="—— To Be Added ——" />
+                <spacer />
+                <label text="• Editor Updating System." />
+                <label text="• Export to Psych/CNE." />
+            </vbox>
+        </box> -->
+
+        <box text="Discord">
+            <vbox>
+                <!-- tooltip="For more help with the editor join this server." -->
+                <!--  <label text="Nova Editor Server:"/>
+                <label text="https://discord.gg/MTMRYc63Dj"/> -->
+                <card width="450" styleName="discord-card">
+                    <vbox>
+                        <label text="Nova Utils Server"
+                            style="font-name:'fonts/gintoMedium.ttf';color: white;" />
+                        <box height="2" />
+                        <label text="For more help with the editor"
+                            style="font-name:'fonts/gintoRegular.ttf'" />
+                        <label text="join this server!" style="font-name:'fonts/gintoRegular.ttf'" />
+                        <box height="2" />
+                        <button id="joinNovaButton" styleName="discord-button" width="420"
+                            text="Join" tooltip="https://discord.gg/MTMRYc63Dj"
+                            style="font-name:'fonts/gintoRegular.ttf'" />
+                    </vbox>
+                </card>
+                <spacer height="3" />
+                <card width="450" styleName="discord-card">
+                    <vbox>
+                        <label text="V-Slice Network"
+                            style="font-name:'fonts/gintoMedium.ttf';color: white;" />
+                        <box height="2" />
+                        <label text="For help related to V-Slice Modding"
+                            style="font-name:'fonts/gintoRegular.ttf'" />
+                        <label text="join this server!" style="font-name:'fonts/gintoRegular.ttf'" />
+                        <box height="2" />
+                        <button id="joinNetworkButton" styleName="discord-button" width="420"
+                            text="Join" tooltip="https://discord.gg/ca2Kb6kukm"
+                            style="font-name:'fonts/gintoRegular.ttf'" />
+                    </vbox>
+                </card>
+
+            </vbox>
+        </box>
+
+        <!-- <box text="FAQ">
+            <scroll-view width="449" height="445" contentWidth="100%">
+                <vbox>
+                    <frame text=" - General Troubleshooting - " width="435">
+                        <vbox>
+                            <label text=" • Make sure your mod has a valid '_polymod_meta.json'." />
+                        </vbox>
+                    </frame>
+                    <frame text=" - Stage Isn't Showing Up - " width="435">
+                        <vbox>
+                            <label text=" • The stage MUST be placed in the 'stages' folder inside of \n   'data' folder: 'data/stages/yourStage.json'." />
+                        </vbox>
+                    </frame>
+                    <frame text=" - Asset Path is Invalid - " width="435">
+                        <vbox>
+                            <label text=" • Images must be placed in either the 'images/' folder \n   or the 'shared/images/' folder." />
+                            <spacer />
+                            <label text=" • When typing the Asset Path make sure you are using \n   foward slashes: Use '/' NOT '\'." />
+                            <spacer />
+                            <label text=" • When typing the Asset Path you do NOT need to include \n   'images/' or 'shared/images/' as the editor does that \n   automatically." />
+                            <spacer />
+                        </vbox>
+                    </frame>
+                </vbox>
+            </scroll-view>
+        </box> -->
+    </tabview>
+    <window-footer width="100%">
+        <spacer width="100%" />
+        <button id="closeButton" text="Close" />
+    </window-footer>
+</window>

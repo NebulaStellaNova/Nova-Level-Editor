@@ -3,6 +3,7 @@ import flixel.FlxG;
 import Reflect;
 
 class KeybindHandler extends Module {
+    public static var CANCEL_INPUT:Bool = false;
     public var keybinds = [];
 
     public function new() {
@@ -38,7 +39,7 @@ class KeybindHandler extends Module {
                 }
                 index++;
             }
-            if (pressed) {
+            if (pressed && !KeybindHandler.CANCEL_INPUT) {
                 keybind.action(e.elapsed);
             }
         }

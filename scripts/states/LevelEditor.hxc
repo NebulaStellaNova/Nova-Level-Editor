@@ -39,6 +39,8 @@ import funkin.input.Cursor;
 
 import flixel.text.FlxText;
 
+import funkin.save.Save;
+
 import flixel.FlxCamera;
 import flixel.FlxG;
 
@@ -57,7 +59,16 @@ using StringTools;
 class LevelEditor extends MusicBeatState {
 
     public static var instance:LevelEditor;
-
+    
+    public var save = {
+		bind: (string1, string2)->{},
+		data: Save.fetchFromSlotRaw('nova-editors') ?? {
+			editorSong: null,
+            precacheChars: true,
+            precacheStages: true
+		}
+	};
+    
     // -- Cameras -- \\
     public var UI_CAMERA:FlxCamera;
     public var LEVEL_CAMERA:FlxCamera;
@@ -72,14 +83,14 @@ class LevelEditor extends MusicBeatState {
     public var titleAssetOverlay:FunkinSprite;
 
     // -- Text -- \\
-    var levelTitleText:FlxText;
-    var scoreText:FlxText;
-    var tracklistText:FlxText;
+    public var levelTitleText:FlxText;
+    public var scoreText:FlxText;
+    public var tracklistText:FlxText;
 
     // -- UI Elements -- \\
-    var MENU_BAR;
-    var LEVEL_DATA;
-    var EDIT_PROP;
+    public var MENU_BAR;
+    public var LEVEL_DATA;
+    public var EDIT_PROP;
     
     // -- Other Stuff -- \\
     public var WINDOW_MANAGER:WindowManager = new WindowManager(); // nigger - genzu
@@ -129,7 +140,7 @@ class LevelEditor extends MusicBeatState {
             // add(newLevelDialog);
             newLevelDialog.screenCenter();
             newLevelDialog.showDialog(true);
-            cancelInput = true;
+            KeybindHandler.CANCEL_INPUT = true;
 
             for (i in PolymodHandler.getAllMods()) {
                 newLevelDialog.findComponent("modFolderList").dataSource.add({ text: i.title + " (" + i.id + ")" });
@@ -138,7 +149,7 @@ class LevelEditor extends MusicBeatState {
 
             var cancelButton = newLevelDialog.findComponent("dialogCancel");
             cancelButton.onClick = ()->{
-                cancelInput = false;
+                KeybindHandler.CANCEL_INPUT = false;
                 newLevelDialog.hide();
             }
 
@@ -179,12 +190,49 @@ class LevelEditor extends MusicBeatState {
                         } 
                     }
 
-                    cancelInput = false;
+                    KeybindHandler.CANCEL_INPUT = false;
                     newLevelDialog.hide();
                 }
             }
         }
+        KeybindHandler.addKeybind(["CONTROL", "N"], newLevelCallback);
+        
+        var saveLevelComponent = MENU_BAR.findComponent("saveLevel");
+        var saveLevelCallback = saveLevelComponent.onClick = ()->{
+		    for (mod in PolymodHandler.getAllMods()) {
+                if (FileUtil.directoryExists("mods/" + mod.id + "/data/levels/")) {
+                    if (FileUtil.readDir("mods/" + mod.id + "/data/levels/").contains(SELECTED_LEVEL.id + ".json")) {
+                        var path = "mods/" + mod.id + "/data/levels/" + SELECTED_LEVEL.id + ".json";
+		                FileUtil.deleteFile(path);
+		                FileUtil.writeStringToPath(path, levelToString(SELECTED_LEVEL));
 
+                        newNotification("Success!", 'Successfully saved level to "' + path + '"', NotificationType.Success, 5000);
+                        return;
+                    }
+                }
+            }
+        }
+        KeybindHandler.addKeybind(["CONTROL", "S"], saveLevelCallback);
+
+        var userGuide = MENU_BAR.findComponent("userGuide");
+        var userGuideCallback = userGuide.onClick = ()->{
+            userGuideWindow = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/userGuideWindow"));
+            WINDOW_MANAGER.addWindow(userGuideWindow);
+            userGuideWindow.screenCenter();
+            KeybindHandler.CANCEL_INPUT = true;
+
+            userGuideWindow.findComponent("closeButton").onClick = ()->{
+                WINDOW_MANAGER.closeWindow(userGuideWindow);
+                KeybindHandler.CANCEL_INPUT = false;
+            }
+            
+            for (i in ["joinNovaButton", "joinNetworkButton"]) {
+                userGuideWindow.findComponent(i).onClick = ()->{
+                    FlxG.openURL(userGuideWindow.findComponent(i).tooltip);
+                }
+            }
+        }
+        KeybindHandler.addKeybind(["F1"], userGuideCallback);
 
         LEVEL_DATA = RuntimeComponentBuilder.build(Paths.ui("level-editor/windows/levelData"));   
         WINDOW_MANAGER.addWindow(LEVEL_DATA);
@@ -386,6 +434,7 @@ class LevelEditor extends MusicBeatState {
             // -- Get Selected Level Data -- \\
             SELECTED_LEVEL = new Level('week1');
             SELECTED_LEVEL._data = LEVEL_REGISTRY.get(levelDropdown.selectedItem.id);
+            SELECTED_LEVEL.id = levelDropdown.selectedItem.id;
             loadLevel(SELECTED_LEVEL);
 
             // -- Set UI To Selected Data -- \\
@@ -496,7 +545,7 @@ class LevelEditor extends MusicBeatState {
         var first;
         var index = 0;
         for (i in LevelRegistry.instance.listSortedLevelIds()) {
-            // if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
+            if (LevelRegistry.instance.listBaseGameEntryIds().contains(i)) continue;
             var level = new Level(i);
             LEVEL_DATA.findComponent("levelDropdown").dataSource.add({text: level.getTitle(), id: i});
             if (index == 0) first = ()->{
@@ -511,9 +560,11 @@ class LevelEditor extends MusicBeatState {
 
         notificationManager.addNotification({
             title: "Welcome!",
-            body: "Welcome to the Nova Stage Editor! Press F1 for a user guide.",
+            body: "Welcome to the Nova Level Creator! Press F1 for a user guide.",
             type: NotificationType.Default
         });
+
+        initializeMusic();
     }
 
     var prev = FlxG.sound.volume;
@@ -521,10 +572,6 @@ class LevelEditor extends MusicBeatState {
     function update(e) {
         super.update(e);        
         get_conductorInUse().update();
-
-        if (FlxG.keys.justPressed.I) {
-            trace(levelToString(SELECTED_LEVEL));
-        }
 
         LEVEL_DATA.findComponent("editProp").disabled = SELECTED_PROP == null;
         LEVEL_DATA.findComponent("createProp").disabled = SELECTED_PROP == null;
@@ -605,6 +652,7 @@ class LevelEditor extends MusicBeatState {
     function destroy() {
         super.destroy();
         Cursor.hide();
+        Save.writeToAvailableSlot('nova-editors', save.data);
     }
 
     function loadLevel(level) {
@@ -797,7 +845,6 @@ class LevelEditor extends MusicBeatState {
 
     function levelToString(level) {
         var levelData = Json.parse(Json.stringify(level._data));
-        levelData.generatedBy = LevelEditorData.EDITOR_TITLE + " v" + LevelEditorData.EDITOR_VERSION;
         return Json.stringify(levelData, null, "\t");
     }
 
@@ -810,6 +857,69 @@ class LevelEditor extends MusicBeatState {
             expiryMs: expiryMs ?? null,
             actions: actions ?? []
         });
+    }
+
+    function initializeMusic() {
+        trace(save.data.editorSong.key);
+        save.bind("nova-editors", "NebulaStellaNova");
+        if (save.data.editorSong == null) {
+            save.data.editorSong = {
+                title: "Artistic Expression",
+                key: "chartEditorLoop"
+            }
+        }
+		FunkinSound.playMusic(save.data.editorSong.key, {startingVolume: 0, overrideExisting: true, restartTrack: false, persist: true, loop: true});
+		FlxG.sound.music.fadeIn(0.5 /* Duration */, 0, 1);
+
+        var musicSlider = MENU_BAR.findComponent("menubarItemVolumeInstrumental");
+        musicSlider.onChange = ()->{
+            FlxG.sound.music.volume = musicSlider.pos/100;
+            MENU_BAR.findComponent("editorMusicVolume").text = "Editor Music - " + Math.round(musicSlider.pos) + "%";
+        }
+
+        var musicMenu = MENU_BAR.findComponent("musicMenu");
+        musicMenu.dataSource.add({text: "Freaky Menu", id: "freakyMenu"});
+        
+        var folders = [
+            "assets/shared/music/",
+            "assets/music/"
+        ];
+        for (mod in PolymodHandler.getAllMods()) {
+            if (FileUtil.directoryExists("mods/" + mod.id + "/music/")) {
+                folders.push("mods/" + mod.id + "/music/");
+            }
+        }
+        for (folder in folders) {
+            for (file in FileUtil.readDir(folder)) {
+                if (file.endsWith(".ogg") || file == "credits" || file == "freakyMenu" || file == "gameplay") continue;
+                var name;
+                if (FileUtil.fileExists(folder + file + "/" + file + "-metadata.json")) {
+                    name = Json.parse(FileUtil.readStringFromPath(folder + file + "/" + file + "-metadata.json")).songName;
+                } else {
+                    name = file;
+                }
+                musicMenu.dataSource.add({text: name, id: file});
+                musicMenu.onChange = ()->{
+                    save.data.editorSong = {
+                        title: musicMenu.selectedItem.text,
+                        key: musicMenu.selectedItem.id
+                    }
+                    FunkinSound.playMusic(musicMenu.selectedItem.id, {startingVolume: 1, overrideExisting: true, restartTrack: false, persist: true, loop: true});
+                    
+                    // FlxG.sound.music.fadeIn(0.5, 0, 1);
+                }
+                /* var thing = new MenuItem();
+                thing.text = name;
+                thing.id = file;
+                thing.onClick = ()->{
+                    FunkinSound.playMusic(file, {startingVolume: 0, overrideExisting: true, restartTrack: false, persist: true, loop: true});
+                    FlxG.sound.music.fadeIn(0.5, 0, 1);
+                } */
+    
+                //musicMenu.addComponent(thing);
+            }
+        }
+
     }
 
     /* function formatJSON(string) {
